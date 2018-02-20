@@ -1,0 +1,48 @@
+Inserts: Create a graph showing connections between airports. Connect the airports with a relationship “connected_to”. The relationship has the following properties: time (in minutes) and price (in euro).
+
+CREATE(a1:Airport {city:"Dublin", country:"Ireland", code:"DUB"}),
+(a2:Airport {city:"Cork", country:"Ireland", code:"ORK"}),
+(a3:Airport {city:"London", country:"UK", code:"LHR"}),
+(a4:Airport {city:"Rome", country:"Italy", code:"FCO"}),
+(a5:Airport {city:"Moscow", country:"Russia", code:"DME"}),
+(a6:Airport {city:"Hong Kong", country:"China", code:"HKG"}),
+(a7:Airport {city:"Amsterdam", country:"Holland", code:"AMS"}),
+(a8:Airport {city:"Berlin", country:"Germany", code:"TXL"}),
+(a9:Airport {city:"Paris", country:"France", code:"CDG"}),
+(a10:Airport {city:"New York", country:"USA", code:"JFK"}),
+(a11:Airport {city:"Chicago", country:"USA", code:"ORD"}),
+(a12:Airport {city:"Sao Paulo", country:"Brazil", code:"GRU"}),
+(a13:Airport {city:"Rio", country:"Brazil", code:"GIG"}),
+(a3)-[:CONNECTED_TO {time: 45, price: 150}]->(a1),
+(a4)-[:CONNECTED_TO {time: 150, price: 400}]->(a3),
+(a4)-[:CONNECTED_TO {time: 120, price: 500}]->(a9),
+(a9)-[:CONNECTED_TO {time: 60, price: 200}]->(a1),
+(a8)-[:CONNECTED_TO {time: 240, price: 900}]->(a5),
+(a9)-[:CONNECTED_TO {time: 30, price: 100}]->(a7),
+(a8)-[:CONNECTED_TO {time: 120, price: 900}]->(a1),
+(a3)-[:CONNECTED_TO {time: 700, price: 1100}]->(a10),
+(a1)-[:CONNECTED_TO {time: 360, price: 800}]->(a10),
+(a1)-[:CONNECTED_TO {time: 50, price: 50}]->(a2),
+(a1)-[:CONNECTED_TO {time: 150, price: 70}]->(a4),
+(a1)-[:CONNECTED_TO {time: 480, price: 890}]->(a11),
+(a7)-[:CONNECTED_TO {time: 660, price: 750}]->(a6),
+(a3)-[:CONNECTED_TO {time: 750, price: 1000}]->(a6),
+(a1)-[:CONNECTED_TO {time: 90, price: 60}]->(a7),
+(a5)-[:CONNECTED_TO {time: 720, price: 1000}]->(a10),
+(a5)-[:CONNECTED_TO {time: 420, price: 500}]->(a6),
+(a10)-[:CONNECTED_TO {time: 240, price: 430}]->(a11),
+(a1)-[:CONNECTED_TO {time: 900, price: 800}]->(a12),
+(a12)-[:CONNECTED_TO {time: 840, price: 650}]->(a10),
+(a13)-[:CONNECTED_TO {time: 1200, price: 1100}]->(a8);
+
+Question 1: Find the total time from Moscow to Rio. Show also the path (airport connections)
+MATCH path = shortestPath((a:Airport {city: "Moscow"})-[:CONNECTED_TO*..5]-(a1:Airport {city:"Rio"}))RETURN path, REDUCE(total_time = 0, a2 IN relationships(path) | total_time + a2.time) AS TOTAL_TIME;
+
+Question 2: - Show all the flights from Dublin to any destination and sort them by price (from the most expensive)
+MATCH (a:Airport {city: "Dublin"})-[c:CONNECTED_TO]-(a1:Airport) RETURN a1, c.price ORDER BY c.price DESC;
+
+Question 3: Show what can be reached from Chicago in one or two steps (= direct flight or 1 change only)
+MATCH (a:Airport {city: "Chicago"})-[:CONNECTED_TO*..2]-(a1:Airport) RETURN a1;
+
+Question 4: Show what can be reached from London in less than 240 minutes (4 hours).
+MATCH path = (a:Airport {city: "London"})-[:CONNECTED_TO*..5]-(a1:Airport) WITH path, REDUCE(total_time = 0, r IN relationships(path) | total_time + r.time) AS total_time WHERE total_time < 240 RETURN path, total_time;

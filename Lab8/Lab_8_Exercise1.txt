@@ -1,0 +1,43 @@
+Add a person Tom (age: 28 from: Spain like: football). Make Tom a friend of Mary.
+Insert a new person (name: Bill, age: 23, country: Ireland) and make Bill a friend of Mary and Denis
+
+Q1: CREATE (e17:Person { name: "Tom", country: "Spain", age: 22, sport: "Football" }), (e18:Person { name: "Bill", country: "Ireland", age: 23});
+create (e17)-[:FRIEND_OF]->(e1)
+create (e18)-[:FRIEND_OF]->(e1),(e18)-[:FRIEND_OF]->(e16)
+
+Query:
+Question 1: Show the age of Denis and his friends
+MATCH (e:Person {name: 'Denis'}) - [:FRIEND_OF] -> (e2:Person) return e2.age, e.age
+
+Question 2: Show all the person from Scotland
+MATCH (e:Person {country:"Scotland"}) return e
+
+Question 3: Show all the person with age less or equal than 20 from Ireland
+MATCH (e:Person {country:"Ireland"}) WHERE e.age <= 20 RETURN e;
+
+Question 4: Show all the person with age less or equal 30 playing football
+MATCH (e:Person {sport:"Football"}) WHERE e.age <= 30 RETURN e;
+
+Question 5: Count the person by country
+MATCH (e:Person) RETURN e.country, COUNT(e.country) as numCountry
+
+Question 6: Show the average age of the person group by sport
+MATCH (e:Person) RETURN avg(e.age), e.sport order by e.sport
+
+Question 7: Show all the direct friends of Mary
+MATCH (e:Person {name: 'Mary'}) - [:FRIEND_OF*1] -> (e2:Person) return e2.name
+
+Question 8: Show all the friends of Paul with a maximum distance of 5 steps
+MATCH (p:Person {name:"Paul"})-[:FRIEND_OF*1..5]->(e:Person) RETURN e
+
+Question 9: Count all the friends of Paul with maximum distance 5 steps by nationality
+MATCH (p:Person {name:"Paul"})-[:FRIEND_OF*..5]->(e:Person) RETURN e.country, COUNT(e.country);
+
+Question 10: Show the path(s) between Paul and Lisa. For each path show the length. How many paths are there?
+MATCH path = (e:Person {name:"Paul"})-[:FRIEND_OF*..5]->(e2:Person {name:"Lisa"}) RETURN path, length(path)
+
+Question 11: Show the shortest path between Paul and Lisa
+MATCH path = shortestPath((e:Person {name:"Paul"})-[:FRIEND_OF*1..5]-> (m:Person {name:"Lisa"})) RETURN path
+
+Question 12: Show (if exists) a connection between Mary and all her friends, where the path can only contain persons that play football
+MATCH path = (m:Person {name:"Mary"})-[:FRIEND_OF]->(p:Person {sport:"Football"}) RETURN path;
